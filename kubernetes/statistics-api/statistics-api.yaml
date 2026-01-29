@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statistics-api
+  namespace: deviceapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: statistics-api
+  template:
+    metadata:
+      labels:
+        app: statistics-api
+    spec:
+      containers:
+      - name: statistics-api
+        image: migsouto/statistics-api:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_DB
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+#        - name: DATABASE_URL
+#          value: "postgresql://postgres:postgres@postgres:5432/devicedb"
+        - name: DEVICE_API_URL
+          value: "http://device-registration-api:8001"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statistics-api
+  namespace: deviceapp
+spec:
+  selector:
+    app: statistics-api
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
