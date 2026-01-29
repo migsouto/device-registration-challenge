@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: device-registration-api
+  namespace: deviceapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: device-registration-api
+  template:
+    metadata:
+      labels:
+        app: device-registration-api
+    spec:
+      containers:
+      - name: device-registration-api
+        image: migsouto/device-registration-api:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_DB
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+#          value: "postgresql://postgres:postgres@postgres:5432/devicedb"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: device-registration-api
+  namespace: deviceapp
+spec:
+  selector:
+    app: device-registration-api
+  ports:
+  - port: 8001
+    targetPort: 8001
+  type: ClusterIP
