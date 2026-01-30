@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-allow-ingress
+  namespace: deviceapp
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: device-registration-api
+    - podSelector:
+        matchLabels:
+          app: statistics-api
+    ports:
+    - protocol: TCP
+      port: 5432
