@@ -137,6 +137,16 @@ docker pull migsouto/statistics-api:latest
 - **Least Privilege**: Default deny-all with specific allow rules
 
 ### postgres-secret.yaml example (to be created in kubernetes\secrets\postgres-secret.yaml)
+-apiVersion: v1
+-kind: Secret
+-metadata:
+-  name: postgres-secret
+-  namespace: deviceapp
+-type: Opaque
+-stringData:
+-  POSTGRES_USER: device_schema_owner
+-  POSTGRES_PASSWORD: device_schema_owner_pass
+-  POSTGRES_DB: devicedb
   
 ### Security Note
 - in case of production use postgres-secret yaml shouldn't be used 
